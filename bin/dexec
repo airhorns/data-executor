@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+$LOAD_PATH.unshift File.join(File.dirname(__FILE__), '..', 'lib')
+require 'optparse'
+require 'executor'
+
+god_options = {
+  daemonize: false,
+  syslog: false,
+}
+
+options = {
+  namespace: "dexec-anon",
+  collector: "http://127.0.0.1:7789"
+}
+
+ORIGINAL_ARGV = ARGV.dup
+
+opts = OptionParser.new do |o|
+  o.banner = "Usage: dexec [options] <command_to_run>"
+
+  o.on("-j", "--namespace", String, "Job namespace") do |namespace|
+    options[:namespace] = namespace
+  end
+
+  o.on("-c", "--collector COLLECTOR_URI", String, "dexec data collector http url") do |collector|
+    options[:collector] = collector
+  end
+end
+
+opts.parse!
+options[:command] = ARGV.join(" ")
+
+Executor.new(options, god_options)
